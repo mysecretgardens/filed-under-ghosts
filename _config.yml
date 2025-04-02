@@ -1,0 +1,19 @@
+collections:
+  ghost_files:
+    output: true
+    permalink: /ghost-files/:title/
+  sigils:
+    output: true
+    permalink: /subtext-and-sigils/:title/
+  dust_data:
+    output: true
+    permalink: /dust-and-data/:title/
+  dead_links:
+    output: true
+    permalink: /dead-links/:title/
+  hauntings:
+    output: true
+    permalink: /anatomy/:title/
+  transmissions:
+    output: true
+    permalink: /transmissions/:title/
