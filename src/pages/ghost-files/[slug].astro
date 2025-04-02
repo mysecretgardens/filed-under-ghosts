@@ -1,1 +1,17 @@
+---
+import { getCollection, getEntryBySlug } from "astro:content";
+import { AstroError } from "astro/errors";
 
+const { slug } = Astro.params;
+const entry = await getEntryBySlug("ghost-files", slug);
+
+if (!entry) throw new AstroError("Entry not found");
+
+const { Content } = await entry.render();
+---
+
+<article>
+  <h1>{entry.data.title}</h1>
+  <p><em>{entry.data.date}</em></p>
+  <Content />
+</article>
