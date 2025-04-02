@@ -1,0 +1,15 @@
+---
+import { getCollection } from "astro:content";
+const ghostFiles = await getCollection("ghost-files");
+---
+
+<h1>Ghost Files</h1>
+
+<ul>
+  {ghostFiles.map((entry) => (
+    <li>
+      <a href={`/ghost-files/${entry.slug}`}>{entry.data.title}</a>
+      <p>{entry.data.summary}</p>
+    </li>
+  ))}
+</ul>
