@@ -1,0 +1,49 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const sigils = (await getCollection("sigils")).sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+
+const pageTitle = "Subtext & Sigils";
+const description = "A catalog of symbols, rituals, and protective language.";
+---
+
+<BaseLayout title={pageTitle} description={description}>
+  <main class="entry-page">
+    <h1 class="archive-heading">{pageTitle}</h1>
+    <p class="archive-intro">{description}</p>
+
+    <ul class="archive-list">
+      {sigils.map((entry) => (
+        <li class="archive-card">
+          <h2 class="archive-title">
+            <a href={`/subtext-and-sigils/${entry.id}`}>{entry.data.title}</a>
+          </h2>
+          <p class="archive-meta">
+            {entry.data.date.toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+            {entry.data.tags?.length && (
+              <>
+                {" "}·{" "}
+                <span class="entry-tags">
+                  {entry.data.tags.map((tag) => (
+                    <span class="tag" key={tag}>{tag}</span>
+                  ))}
+                </span>
+              </>
+            )}
+          </p>
+          {entry.data.summary && (
+            <p class="archive-summary">{entry.data.summary}</p>
+          )}
+          <a href={`/subtext-and-sigils/${entry.id}`} class="read-link">Open spell →</a>
+        </li>
+      ))}
+    </ul>
+  </main>
+</BaseLayout>

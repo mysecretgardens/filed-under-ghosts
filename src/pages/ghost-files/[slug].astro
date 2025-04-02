@@ -1,17 +1,60 @@
 ---
-import { getCollection, getEntryBySlug } from "astro:content";
-import { AstroError } from "astro/errors";
+import { getCollection, render } from "astro:content";
+export async function getStaticPaths() {
+  const ghostFiles = await getCollection("ghostFiles");
+  return ghostFiles.map((ghostFile) => ({
+    params: { slug: ghostFile.id },
+    props: { ghostFile },
+  }));
+}
 
-const { slug } = Astro.params;
-const entry = await getEntryBySlug("ghost-files", slug);
+const { ghostFile } = Astro.props;
+const { Content } = await render(ghostFile);
 
-if (!entry) throw new AstroError("Entry not found");
+const { title, tags, summary, date } = ghostFile.data;
+const description = summary ?? title;
 
-const { Content } = await entry.render();
+import BaseLayout from "../../layouts/BaseLayout.astro";
 ---
 
-<article>
-  <h1>{entry.data.title}</h1>
-  <p><em>{entry.data.date}</em></p>
-  <Content />
-</article>
+<BaseLayout title={title} description={description}>
+  <main class="entry-page">
+    <article>
+      <header>
+        <h1>{title}</h1>
+        <p class="entry-meta">
+          <time datetime={date.toISOString()}>
+            {
+              date.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })
+            }
+          </time>
+          {
+            tags && tags.length > 0 && (
+              <>
+                {" "}
+                —{" "}
+                <span class="entry-tags">
+                  {tags.map((tag) => (
+                    <span class="tag"> {tag}</span>
+                  ))}
+                </span>
+              </>
+            )
+          }
+        </p>
+      </header>
+
+      <section class="entry-content">
+        <Content />
+      </section>
+    </article>
+
+    <footer>
+      <a href="/ghost-files">← Back to all Ghost Files</a>
+    </footer>
+  </main>
+</BaseLayout>

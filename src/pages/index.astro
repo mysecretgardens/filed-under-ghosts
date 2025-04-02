@@ -1,8 +1,96 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
----
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
 
-<Layout>
-  <Welcome />
-</Layout>
+type EntryType =
+  | "ghostfile"
+  | "sigil"
+  | "data"
+  | "deadlink"
+  | "haunting"
+  | "transmission";
+
+function getPathFromType(type: EntryType, slug: string): string {
+  const paths: Record<EntryType, string> = {
+    ghostfile: "ghost-files",
+    sigil: "subtext-and-sigils",
+    data: "dust-and-data",
+    deadlink: "dead-links",
+    haunting: "anatomy",
+    transmission: "transmissions",
+  };
+
+  return `/${paths[type]}/${slug}`;
+}
+
+function getTypeLabel(type: EntryType): string {
+  const labels: Record<EntryType, string> = {
+    ghostfile: "Ghost File",
+    sigil: "Sigil",
+    data: "Data Pull",
+    deadlink: "Dead Link",
+    haunting: "Haunting",
+    transmission: "Transmission",
+  };
+
+  return labels[type];
+}
+
+const collections = await Promise.all([
+  getCollection("ghostFiles"),
+  getCollection("sigils"),
+  getCollection("dustData"),
+  getCollection("deadLinks"),
+  getCollection("hauntings"),
+  getCollection("transmissions"),
+]);
+
+const allEntries = collections.flat().sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+
+const pageTitle = "Filed Under Ghosts";
+const description = "An evolving archive of hauntings, rituals, fragments, and residue.";
+---
+<BaseLayout title={pageTitle} description={description}>
+  <main class="entry-page">
+    <h1 class="archive-heading">{pageTitle}</h1>
+    <p class="archive-intro">{description}</p>
+
+    <ul class="archive-list">
+      {allEntries.map((entry) => {
+        const { title, date, tags, summary, type } = entry.data;
+        const path = getPathFromType(type as EntryType, entry.id);
+
+        return (
+          <li class="archive-card">
+            <h2 class="archive-title">
+              <a href={path}>{title}</a>
+            </h2>
+            <p class="archive-meta">
+              {date.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+              {" "}·{" "}
+              <span class="entry-type">{getTypeLabel(type as EntryType)}</span>
+              {tags?.length && (
+                <>
+                  {" "}·{" "}
+                  <span class="entry-tags">
+                    {tags.map((tag) => (
+                      <span class="tag">{tag}</span>
+                    ))}
+                  </span>
+                </>
+              )}
+            </p>
+            {summary && <p class="archive-summary">{summary}</p>}
+            <a href={path} class="read-link">Read entry →</a>
+          </li>
+        );
+      })}
+    </ul>
+  </main>
+</BaseLayout>
